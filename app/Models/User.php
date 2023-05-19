@@ -40,13 +40,15 @@ class User extends Authenticatable
         return $this->hasMany(Entrie::class);
     }
 
+    public function padlet() : hasMany{
+        return $this->hasMany(Padlet::class);
+    }
+
+    //Fremdschlüssel werden in Pivot Tabelle padlet_user gespeichert
+    //rolle von user in bestimmten Padlet
     public function padlets() : BelongsToMany{
-        return $this->belongsToMany(Padlet::class);
+        return $this->belongsToMany(Padlet::class, 'padlet_user');
     }
 
-    public function roles() : BelongsToMany{
-        return $this->belongsToMany(Role::class);
-    }
 
-    /*Zusätzliche padlets() : has Many von Padlet?*/
 }

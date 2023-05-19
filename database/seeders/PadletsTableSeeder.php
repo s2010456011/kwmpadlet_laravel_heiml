@@ -35,8 +35,6 @@ class PadletsTableSeeder extends Seeder
         //sync them all in one table
         $users = User::all()->pluck("id");
         $roles = Role::all()->pluck("id");
-        //$padlet->users()->sync($users);
-        //$padlet->roles()->sync($roles);
         $padlet->users()->syncWithPivotValues($users, ['role_id' => $roles[1]]);
         $padlet->save();
 

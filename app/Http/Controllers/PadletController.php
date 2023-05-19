@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Entrie;
 use App\Models\Padlet;
+use App\Models\PadletUser;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -65,6 +66,7 @@ class PadletController extends Controller
             //legt neues Padlet an
             $padlet = Padlet::create($request->all());
 
+            //entries neu anlegen oder updaten
             if (isset($request['entries']) && is_array($request['entries'])) {
                 foreach ($request['entries'] as $entry) {
                     //wenn vorhanden dann User aktualisieren, ansonsten neu anlegen
@@ -78,20 +80,20 @@ class PadletController extends Controller
                 }
             }
 
-            //TODO Role ID fehlt noch
-           /* if (isset($request['users']) && is_array($request['users'])) {
+            //user und rollen anlegen
+           if (isset($request['users']) && is_array($request['users'])){
                 foreach ($request['users'] as $user) {
-                    //wenn vorhanden dann User aktualisieren, ansonsten neu anlegen
-                    $user = User::firstOrNew([
-                        'firstname' => $user['firstname'],
-                        'lastname' => $user['lastname'],
-                        'image' => $user['image'],
-                        'email' => $user['email']
+                   PadletUser::create([
+                       'user_id' => $user['id'],
+                       'padlet_id' => $padlet['id'],
+                       'role_id' => $user['role_id']
                     ]);
-                    $padlet->users()->save($user);
                 }
-            }*/
+            }
+
             DB::commit();
+            $padlet = Padlet::with(['entries', 'user', 'users'])
+                ->where('id', $padlet['id'])->first();
             return response()->json($padlet, 200);
         } catch (\Exception $e) {
 
