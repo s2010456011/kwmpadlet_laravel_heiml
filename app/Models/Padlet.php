@@ -23,7 +23,6 @@ class Padlet extends Model
         return $this->belongsTo(User::class);
     }
 
-    //Fremdschlüssel werden in Pivot Tabelle padlet_user gespeichert
     //rolle von user in bestimmten Padlet
     public function users() : BelongsToMany{
         return $this->belongsToMany(User::class, 'padlet_user');

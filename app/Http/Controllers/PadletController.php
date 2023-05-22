@@ -103,8 +103,6 @@ class PadletController extends Controller
     }
 
 
-
-
 //Paldet Updaten
     public function update(Request $request, int $id): JsonResponse
     {

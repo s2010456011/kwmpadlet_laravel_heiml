@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
 use App\Models\Entrie;
 use App\Models\Padlet;
+use App\Models\Rating;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +16,6 @@ class EntrieController extends Controller
         $entries = Entrie::with(['padlet', 'user', 'comments', 'ratings'])->get();
         return response()->json($entries, 200);
     }
-
 
     public function findByID(string $id): JsonResponse{
         $entrie = Entrie::where('id', $id)->with(['padlet', 'user', 'comments', 'ratings'])->first();
@@ -33,15 +34,39 @@ class EntrieController extends Controller
         DB::beginTransaction();
 
         try {
-            //legt neues Padlet an
+            //legt neuen Entry
             $entry = Entrie::create($request->all());
+
+            //comments neu anlegen oder updaten
+            if (isset($request['comments']) && is_array($request['comments'])) {
+                foreach ($request['comments'] as $comment) {
+                    //wenn vorhanden dann aktualisieren, ansonsten neu anlegen
+                    $comment = Comment::firstOrNew([
+                        'text' => $comment['text'],
+                        'user_id' => $entry['user_id']
+                    ]);
+                    $entry->comments()->save($comment);
+                }
+            }
+
+            //ratings neu anlegen oder updaten
+            if (isset($request['ratings']) && is_array($request['ratings'])) {
+                foreach ($request['ratings'] as $ratings) {
+                    //wenn vorhanden dann aktualisieren, ansonsten neu anlegen
+                    $ratings = Rating::firstOrNew([
+                        'number' => $ratings['number'],
+                        'user_id' => $entry['user_id']
+                    ]);
+                    $entry->ratings()->save($ratings);
+                }
+            }
 
             DB::commit();
             return response()->json($entry, 200);
         } catch (\Exception $e) {
 
             DB::rollBack();
-            return response()->json("Padlet speichern hat fehlgeschlagen: " . $e->getMessage(), 420);
+            return response()->json("Entry speichern hat fehlgeschlagen: " . $e->getMessage(), 420);
         }
     }
 
@@ -57,6 +82,31 @@ class EntrieController extends Controller
             if ($entry != null) {
                 $entry->update($request->all());
             }
+
+            //comments neu anlegen oder updaten
+            if (isset($request['comments']) && is_array($request['comments'])) {
+                foreach ($request['comments'] as $comment) {
+                    //wenn vorhanden dann aktualisieren, ansonsten neu anlegen
+                    $comment = Comment::firstOrNew([
+                        'text' => $comment['text'],
+                        'user_id' => $entry['user_id']
+                    ]);
+                    $entry->comments()->save($comment);
+                }
+            }
+
+            //ratings neu anlegen oder updaten
+            if (isset($request['ratings']) && is_array($request['ratings'])) {
+                foreach ($request['ratings'] as $ratings) {
+                    //wenn vorhanden dann aktualisieren, ansonsten neu anlegen
+                    $ratings = Rating::firstOrNew([
+                        'number' => $ratings['number'],
+                        'user_id' => $entry['user_id']
+                    ]);
+                    $entry->ratings()->save($ratings);
+                }
+            }
+
             DB::commit();
             $entry = Entrie::with(['padlet', 'user', 'comments', 'ratings'])
                 ->where('id', $id)->first();

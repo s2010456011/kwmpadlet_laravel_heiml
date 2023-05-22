@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
     protected $fillable = [
@@ -50,5 +51,15 @@ class User extends Authenticatable
         return $this->belongsToMany(Padlet::class, 'padlet_user');
     }
 
+    //gibt key von aktuellem JWT zurück
+    public function getJWTIdentifier(){
+        return $this->getKey();
+    }
+
+    //Custom Claim ist Custom Payload --> Daten die selbst im JWT gespeichert werden können
+    //dort soll benutzer gespeichert werden --> NICHT VERSCHLÜSSELT!
+    public function getJWTCustomClaims(){
+        return ['user' => ['id' => $this->id]];
+    }
 
 }
