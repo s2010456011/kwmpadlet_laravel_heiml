@@ -83,27 +83,31 @@ class EntrieController extends Controller
                 $entry->update($request->all());
             }
 
+            //delete all old
+            $entry->comments()->delete();
             //comments neu anlegen oder updaten
             if (isset($request['comments']) && is_array($request['comments'])) {
-                foreach ($request['comments'] as $comment) {
-                    //wenn vorhanden dann aktualisieren, ansonsten neu anlegen
-                    $comment = Comment::firstOrNew([
-                        'text' => $comment['text'],
-                        'user_id' => $entry['user_id']
-                    ]);
+                foreach ($request['comments'] as $comments) {
+                    //comments neu anlegen oder updaten
+                    //ohne ::firstOrNew sonst werden gleiche Werte zusammengefasst
+                    $comment = new Comment();
+                    $comment->text = $comments['text'];
+                    $comment->user_id = $entry['user_id'];
                     $entry->comments()->save($comment);
-                }
-            }
+                        }
+                    }
 
+
+            //delete all old
+            $entry->ratings()->delete();
             //ratings neu anlegen oder updaten
+            //ohne ::firstOrNew sonst werden gleiche Werte zusammengefasst
             if (isset($request['ratings']) && is_array($request['ratings'])) {
                 foreach ($request['ratings'] as $ratings) {
-                    //wenn vorhanden dann aktualisieren, ansonsten neu anlegen
-                    $ratings = Rating::firstOrNew([
-                        'number' => $ratings['number'],
-                        'user_id' => $entry['user_id']
-                    ]);
-                    $entry->ratings()->save($ratings);
+                    $rating = new Rating();
+                    $rating->number = $ratings['number'];
+                    $rating->user_id = $entry['user_id'];
+                    $entry->ratings()->save($rating);
                 }
             }
 

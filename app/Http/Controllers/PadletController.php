@@ -130,6 +130,17 @@ class PadletController extends Controller
                         $padlet->entries()->save($entry);
                     }
                 }
+
+                //user und rollen anlegen
+                if (isset($request['users']) && is_array($request['users'])){
+                    foreach ($request['users'] as $user) {
+                        PadletUser::firstOrNew([
+                            'user_id' => $user['id'],
+                            'padlet_id' => $padlet['id'],
+                            'role_id' => $user['role_id']
+                        ]);
+                    }
+                }
             }
             DB::commit();
             $padlet = Padlet::with(['entries', 'user', 'users'])

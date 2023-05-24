@@ -17,11 +17,10 @@ class Admin
      */
     public function handle(Request $request, Closure $next)
     {
-        $user = JWTAuth::parseToken()->authenticate();
+        $user = auth()->user();
         //wurde ein User zurückgegeben?
-        //TODO rolle ergänzen
         if($user == null){
-            return response()->json(['user not in role admin'], 401);
+            return response()->json(['not allowed'], 401);
         }
 
         return $next($request);
